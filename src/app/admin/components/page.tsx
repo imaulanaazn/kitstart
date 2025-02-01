@@ -1,8 +1,7 @@
 "use client";
-import Image from "next/image";
 import { db } from "../../../lib/firebase";
 import { collection, addDoc, getDocs } from "firebase/firestore";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getUserCred } from "@/utils/userCredential";
 import { validateAdminAcc } from "@/utils/validateAccount";
 import { useRouter } from "next/navigation";
@@ -17,12 +16,8 @@ export default function AdminComponents() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
-  const [thumbnail, setThumbnail] = useState(null);
   const [htmlContent, setHtmlContent] = useState("");
-  const fileRef = useRef(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const imageRef = useRef<any>(null);
-  const [imagePreview, setImagePreview] = useState("");
+  const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [isLogin, setIsLogin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
@@ -42,41 +37,25 @@ export default function AdminComponents() {
   };
 
   const handleAdd = async () => {
-    const imageData = await saveImage();
-
-    if (!name || !description || !categoryId || imageData.status !== 201)
-      return;
+    console.log({ name }, { description }, { categoryId });
+    if (!name || !description || !categoryId)
+      alert("please fill all the inputs");
 
     const result = await addDoc(collection(db, "components"), {
       name,
       description,
       category_id: categoryId,
-      thumbnail: imageData.image,
+      thumbnail: thumbnailUrl,
     });
     setName("");
     setDescription("");
     setCategoryId("");
-    setThumbnail(null);
+    setThumbnailUrl("");
 
     if (result.id) {
       await createFile(result.id);
     }
   };
-
-  async function saveImage() {
-    const formData = new FormData();
-    if (thumbnail) {
-      formData.append("thumbnail", thumbnail);
-    }
-
-    const uploadRes = await fetch("/api/images", {
-      method: "POST",
-      body: formData,
-    });
-
-    const uploadData = await uploadRes.json();
-    return uploadData;
-  }
 
   async function createFile(componentId: string) {
     const formData = new FormData();
@@ -93,23 +72,6 @@ export default function AdminComponents() {
     const data = await uploadRes.json();
     return data;
   }
-
-  // eslint-disable-next-line
-  const handleFileChange = async (event: any) => {
-    setThumbnail(event.target.files[0]);
-
-    const file = event.target.files[0];
-    if (file) {
-      const imgURL = URL.createObjectURL(file);
-      if (imageRef.current) {
-        imageRef.current.src = imgURL;
-      }
-
-      setImagePreview(imgURL);
-
-      fileRef.current = file;
-    }
-  };
 
   useEffect(() => {
     const credentials = getUserCred();
@@ -182,7 +144,7 @@ export default function AdminComponents() {
               Description
             </label>
             <input
-              type="description"
+              type="text"
               id="description"
               name="description"
               value={description}
@@ -191,30 +153,15 @@ export default function AdminComponents() {
             />
           </div>
           <div className="mb-4 flex flex-col">
-            <label htmlFor="image">Thumbnail</label>
-            <div className="rounded-xl bg-dark-1 text-white/90 mt-6 h-max">
-              <div className="avatar relative aspect-video h-auto w-40 rounded-lg border-2 border-dashed border-slate-400 bg-[url('/add-personal.svg')] bg-center bg-no-repeat hover:cursor-pointer hover:brightness-50">
-                <Image
-                  src={imagePreview}
-                  width={200}
-                  height={200}
-                  alt={""}
-                  ref={imageRef}
-                  className={`aspect-square h-auto w-full object-cover object-center ${
-                    imagePreview ? "opacity-100" : "opacity-0"
-                  }`}
-                />
-                <input
-                  type="file"
-                  className="absolute left-0 top-0 aspect-square h-auto w-40 opacity-0"
-                  accept="image/*"
-                  ref={fileRef}
-                  onChange={(e) => {
-                    handleFileChange(e);
-                  }}
-                />
-              </div>
-            </div>
+            <label htmlFor="thumbnail">Thumbnail Url</label>
+            <input
+              type="text"
+              id="thumbnail"
+              name="thumbnail"
+              value={thumbnailUrl}
+              onChange={(e) => setThumbnailUrl(e.target.value)}
+              className="w-full rounded border border-gray-300 bg-white py-1 px-3 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+            />
           </div>
           <div className="mb-4">
             <label htmlFor="script" className="text-sm leading-7 text-gray-600">
