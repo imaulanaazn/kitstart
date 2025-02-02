@@ -5,22 +5,16 @@ export const POST = async (req: NextRequest) => {
   const formData = await req.formData();
 
   const folderName = formData.get("folderName");
-  const htmlContent = formData.get("htmlContent");
-  const scriptContent = formData.get("scriptContent");
 
-  if (!folderName || !htmlContent) {
+  if (!folderName) {
     return NextResponse.json({
-      message: "Missing required parameters",
+      message: "Missing folder name",
       status: 400,
     });
   }
 
   try {
-    await createFolderAndFile(
-      folderName as string,
-      htmlContent as string,
-      scriptContent as string
-    );
+    await createFolderAndFile(folderName as string);
     return NextResponse.json({
       message: "File created successfully",
       status: 200,
