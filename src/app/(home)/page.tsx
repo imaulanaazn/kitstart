@@ -77,7 +77,7 @@ function ComponentsPage() {
           <div className="break-inside-avoid mb-4 p-4 bg-white rounded-xl">
             <Image
               className="h-auto max-w-full rounded-lg"
-              src={`/uploads/${component.thumbnail}`}
+              src={component.thumbnail}
               alt="Gallery image"
               width={500}
               height={200}
