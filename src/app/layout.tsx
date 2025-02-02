@@ -49,22 +49,21 @@ export default function RootLayout({
     fetchCategories();
   }, []);
 
+  const shouldHideAside =
+    path.startsWith("/admin/login") || path.startsWith("/components/");
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-blue-50 overflow-hidden`}
       >
-        {!path.includes("admin/login") && (
-          <header className="bg-white fixed top-0 left-0 w-full">
+        {!path.startsWith("/admin/login") && (
+          <header className="bg-white fixed top-0 left-0 w-full z-40">
             <div className="px-4 mx-auto sm:px-6 lg:px-8">
               <div className="flex items-center justify-between h-16 lg:h-20">
                 <div className="flex-shrink-0">
                   <a href="#" title="" className="flex">
-                    <img
-                      className="w-auto h-8"
-                      src="https://cdn.rareblocks.xyz/collection/celebration/images/logo.svg"
-                      alt=""
-                    />
+                    <img className="w-auto h-8" src="/logo.svg" alt="" />
                   </a>
                 </div>
 
@@ -160,8 +159,8 @@ export default function RootLayout({
           </header>
         )}
         <main className="flex">
-          {!path.includes("admin/login") && (
-            <aside className="hidden w-64 md:block min-h-screen bg-white pt-20">
+          {!shouldHideAside && (
+            <aside className="w-64 md:block h-screen bg-white pt-20 overflow-y-auto">
               <nav className="text-sm text-gray-200">
                 <ul className="flex flex-col p-4">
                   <li className="px-4 cursor-pointer bg-gray-800 text-white hover:bg-gray-200 hover:text-white rounded-lg">
