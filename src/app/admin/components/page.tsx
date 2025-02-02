@@ -143,7 +143,7 @@ export default function AdminComponents() {
               Description
             </label>
             <input
-              type="description"
+              type="text"
               id="description"
               name="description"
               value={description}
