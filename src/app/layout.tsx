@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -50,7 +51,7 @@ export default function RootLayout({
   }, []);
 
   const shouldHideAside =
-    path.startsWith("/admin/login") || path.startsWith("/components/");
+    path.startsWith("/admin/login") || path.startsWith("/components/preview");
 
   return (
     <html lang="en">
@@ -62,9 +63,15 @@ export default function RootLayout({
             <div className="px-4 mx-auto sm:px-6 lg:px-8">
               <div className="flex items-center justify-between h-16 lg:h-20">
                 <div className="flex-shrink-0">
-                  <a href="#" title="" className="flex">
-                    <img className="w-auto h-8" src="/logo.svg" alt="" />
-                  </a>
+                  <Link href="/" title="" className="flex">
+                    <Image
+                      className="w-auto h-8"
+                      src="/logo.svg"
+                      alt=""
+                      width={140}
+                      height={50}
+                    />
+                  </Link>
                 </div>
 
                 <button
@@ -163,9 +170,15 @@ export default function RootLayout({
             <aside className="w-64 md:block h-screen bg-white pt-20 overflow-y-auto">
               <nav className="text-sm text-gray-200">
                 <ul className="flex flex-col p-4">
-                  <li className="px-4 cursor-pointer bg-gray-800 text-white hover:bg-gray-200 hover:text-white rounded-lg">
+                  <li
+                    className={`px-4 cursor-pointer rounded-lg ${
+                      path == "/" && "bg-gray-800"
+                    }`}
+                  >
                     <Link
-                      className="py-3 flex items-center text-white"
+                      className={`py-3 flex items-center ${
+                        path == "/" ? "text-white" : "text-gray-800"
+                      }`}
                       href="/"
                     >
                       <svg
@@ -191,11 +204,15 @@ export default function RootLayout({
                   {categories.map((cat) => (
                     <li
                       key={cat.id}
-                      className="px-4 cursor-pointer hover:bg-gray-200"
+                      className={`px-4 cursor-pointer rounded-lg ${
+                        path.includes(cat.id) && "bg-gray-800"
+                      }`}
                     >
                       <Link
-                        className="py-3 flex items-center text-gray-700"
-                        href={`?search=${cat.id}`}
+                        className={`py-3 flex items-center text-gray-700 ${
+                          path.includes(cat.id) && "text-white"
+                        }`}
+                        href={`/components/${cat.id}`}
                       >
                         {/* <svg
                       xmlns="http://www.w3.org/2000/svg"
