@@ -3,10 +3,10 @@ import { getUserCred } from "@/utils/userCredential";
 import { db } from "../../../lib/firebase";
 import {
   collection,
-  addDoc,
   deleteDoc,
   doc,
   getDocs,
+  setDoc,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { validateAdminAcc } from "@/utils/validateAccount";
@@ -20,6 +20,8 @@ interface ICategory {
 export default function Categories() {
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [name, setName] = useState("");
+  const [id, setId] = useState("");
+  const [icon, setIcon] = useState("");
   const [isLogin, setIsLogin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
@@ -38,10 +40,21 @@ export default function Categories() {
   };
 
   const handleAdd = async () => {
-    if (!name) return;
-    await addDoc(collection(db, "categories"), { name });
-    setName("");
-    fetchCategories();
+    try {
+      if (!name || !id) return;
+
+      await setDoc(doc(db, "categories", id), {
+        name,
+        icon,
+      });
+      setName("");
+      setIcon("");
+      setId("");
+      fetchCategories();
+      alert("Category added: " + name);
+    } catch (e) {
+      console.error("Error adding category: ", e);
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -51,7 +64,6 @@ export default function Categories() {
 
   useEffect(() => {
     const credentials = getUserCred();
-    console.log(credentials);
     const isValid = validateAdminAcc(credentials);
     if (isValid) {
       setIsLogin(true);
@@ -74,6 +86,20 @@ export default function Categories() {
               placeholder="Category Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              className="w-full rounded border border-gray-300 bg-white py-1 px-3 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+            />
+            <input
+              type="text"
+              placeholder="Category Id"
+              value={id}
+              onChange={(e) => setId(e.target.value)}
+              className="w-full rounded border border-gray-300 bg-white py-1 px-3 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+            />
+            <input
+              type="text"
+              placeholder="Icon Url"
+              value={icon}
+              onChange={(e) => setIcon(e.target.value)}
               className="w-full rounded border border-gray-300 bg-white py-1 px-3 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
             />
             <button

@@ -15,8 +15,8 @@ export default function AdminComponents() {
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [categoryId, setCategoryId] = useState("");
-  // const [htmlContent, setHtmlContent] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [code, setCode] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [isLogin, setIsLogin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,57 +24,55 @@ export default function AdminComponents() {
   // const [script, setScript] = useState("");
 
   useEffect(() => {
+    const fetchCategories = async () => {
+      const querySnapshot = await getDocs(collection(db, "categories"));
+      const cats = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setCategories(cats);
+    };
+
     fetchCategories();
   }, []);
 
-  const fetchCategories = async () => {
-    const querySnapshot = await getDocs(collection(db, "categories"));
-    const cats = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    setCategories(cats);
-  };
-
   const handleAdd = async () => {
-    if (!name || !description || !categoryId) {
-      alert("please fill out all the inputs");
-      return;
-    }
+    try {
+      if (!name || !description || !selectedCategories) {
+        alert("please fill out all the inputs");
+        return;
+      }
 
-    const result = await addDoc(collection(db, "components"), {
-      name,
-      description,
-      category_id: categoryId,
-      thumbnail: imageUrl,
-    });
-    setName("");
-    setDescription("");
-    setCategoryId("");
-    setImageUrl("");
-
-    if (result.id) {
-      await createFile(result.id);
+      const result = await addDoc(collection(db, "components"), {
+        name,
+        description,
+        code,
+        categories: selectedCategories,
+        thumbnail: imageUrl,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+      setName("");
+      setDescription("");
+      setCode("");
+      setSelectedCategories([]);
+      setImageUrl("");
+      alert("Component added with ID: " + result.id);
+    } catch (error) {
+      console.error("Error adding component: ", error);
     }
   };
 
-  async function createFile(componentId: string) {
-    const formData = new FormData();
-
-    formData.append("folderName", componentId);
-
-    const uploadRes = await fetch("/api/file", {
-      method: "POST",
-      body: formData,
-    });
-
-    const data = await uploadRes.json();
-    return data;
+  function toggleCategories(categoryId: string) {
+    setSelectedCategories((prevSelectedCategories) =>
+      prevSelectedCategories.includes(categoryId)
+        ? prevSelectedCategories.filter((id) => id !== categoryId)
+        : [...prevSelectedCategories, categoryId]
+    );
   }
 
   useEffect(() => {
     const credentials = getUserCred();
-    console.log(credentials);
     const isValid = validateAdminAcc(credentials);
     if (isValid) {
       setIsLogin(true);
@@ -115,26 +113,6 @@ export default function AdminComponents() {
               className="w-full rounded border border-gray-300 bg-white py-1 px-3 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
             />
           </div>
-          <div className="mb-4 flex flex-col gap-4">
-            <label
-              htmlFor="category"
-              className="text-sm leading-7 text-gray-600"
-            >
-              Category
-            </label>
-            <select
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              className="py-2 px-4 bg-slate-200 rounded-md"
-            >
-              <option value="">Select Category</option>
-              {categories.map((cat: ICategory) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-          </div>
           <div className="mb-4">
             <label
               htmlFor="description"
@@ -173,22 +151,44 @@ export default function AdminComponents() {
               onChange={(e) => setScript(e.target.value)}
               className="w-full min-h-48 rounded border border-gray-300 bg-white py-1 px-3 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
             />
-          </div>
+          </div> */}
           <div className="mb-4">
-            <label
-              htmlFor="htmlContent"
-              className="text-sm leading-7 text-gray-600"
-            >
-              HTML Codes :
+            <label htmlFor="code" className="text-sm leading-7 text-gray-600">
+              Codes :
             </label>
             <textarea
-              id="htmlContent"
-              name="htmlContent"
-              value={htmlContent}
-              onChange={(e) => setHtmlContent(e.target.value)}
+              id="code"
+              name="code"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
               className="w-full min-h-80 rounded border border-gray-300 bg-white py-1 px-3 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
             />
-          </div> */}
+          </div>
+          <div className="mb-4 flex flex-col gap-4">
+            <label
+              htmlFor="categories"
+              className="text-sm leading-7 text-gray-600"
+            >
+              Categories
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {categories.map((category) => (
+                <div
+                  onClick={() => {
+                    toggleCategories(category.id);
+                  }}
+                  key={category.id}
+                  className={`py-1.5 px-3 rounded-full  text-sm hover:cursor-pointer ${
+                    selectedCategories.includes(category.id)
+                      ? "bg-emerald-500 text-white"
+                      : "bg-slate-200 text-gray-700"
+                  }`}
+                >
+                  {category.name}
+                </div>
+              ))}
+            </div>
+          </div>
           <button
             onClick={handleAdd}
             className="rounded border-0 bg-indigo-500 py-2 px-6 text-lg text-white hover:bg-indigo-600 focus:outline-none"

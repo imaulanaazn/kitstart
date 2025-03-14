@@ -2,6 +2,7 @@
 import { validateAdminAcc } from "@/utils/validateAccount";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import Image from "next/image";
 
 export default function Page() {
   const [username, setUsername] = useState("");
@@ -25,12 +26,13 @@ export default function Page() {
           <div className="min-h-96 px-8 py-6 mt-4 text-left bg-white dark:bg-gray-900  rounded-xl shadow-lg">
             <div className="flex flex-col justify-center items-center h-full select-none">
               <div className="flex flex-col items-center justify-center gap-2 mb-8">
-                <a href="https://amethgalarcio.web.app/" target="_blank">
-                  <img
-                    src="https://amethgalarcio.web.app/assets/logo-42fde28c.svg"
-                    className="w-8"
-                  />
-                </a>
+                <Image
+                  src="https://amethgalarcio.web.app/assets/logo-42fde28c.svg"
+                  alt="Logo"
+                  width={32}
+                  height={32}
+                  className="w-8"
+                />
                 <p className="m-0 text-[16px] font-semibold dark:text-white">
                   Login to your Account
                 </p>

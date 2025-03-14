@@ -1,101 +1,57 @@
 "use client";
-import { useParams } from "next/navigation";
-import React, { useState } from "react";
-import { db } from "../../../lib/firebase";
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  where,
-} from "firebase/firestore";
+import { IComponent } from "@/interfaces/ComponentInterface";
+import { db } from "@/lib/firebase";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
-interface IComponent {
-  id: string;
-  name: string;
-  thumbnail: string;
-  description: string;
-}
-
-export default function Page() {
+const CategoryComponent = () => {
   const { category_id } = useParams();
   const [components, setComponents] = useState<IComponent[]>([]);
-  const fetchComponents = async (categoryId?: string) => {
-    try {
-      let components: IComponent[] = [];
-      // let categoryData = null;
-
-      if (categoryId) {
-        const categoryRef = doc(db, "categories", categoryId);
-        const categorySnap = await getDoc(categoryRef);
-        if (!categorySnap.exists()) {
-          console.error("Category not found!");
-          return { category: null, components: [] };
-        }
-        // categoryData = { id: categorySnap.id, ...categorySnap.data() };
-
-        // Fetch components linked to this category
-        const componentCategoryQuery = query(
-          collection(db, "component_categories"),
-          where("category_id", "==", categoryRef) // Query by reference
-        );
-        const componentCategorySnapshot = await getDocs(componentCategoryQuery);
-
-        const componentRefs = componentCategorySnapshot.docs.map(
-          (doc) => doc.data().component_id // This is a DocumentReference
-        );
-
-        // Fetch component details
-        const componentPromises = componentRefs.map(async (componentRef) => {
-          const componentSnap = await getDoc(componentRef);
-          return componentSnap.exists()
-            ? {
-                id: componentSnap.id,
-                ...(componentSnap.data() as {
-                  name: string;
-                  thumbnail: string;
-                  description: string;
-                }),
-              }
-            : { id: "", name: "", thumbnail: "", description: "" };
-        });
-
-        components = (await Promise.all(componentPromises)).filter(Boolean);
-      } else {
-        // No category ID provided, fetch all components
-        const componentsQuery = collection(db, "components");
-        const querySnapshot = await getDocs(componentsQuery);
-        components = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...(doc.data() as {
-            name: string;
-            thumbnail: string;
-            description: string;
-          }),
-        }));
-      }
-
-      setComponents(components);
-    } catch (error) {
-      console.error("Error fetching components:", error);
-      return { category: null, components: [] };
-    }
-  };
+  // const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    fetchComponents(category_id as string);
+    const fetchComponents = async () => {
+      const componentsRef = collection(db, "components");
+
+      // Query to get components where categories array contains "footerId"
+      const q = query(
+        componentsRef,
+        where("categories", "array-contains", category_id)
+      );
+      const querySnapshot = await getDocs(q);
+
+      const componentList: IComponent[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        componentList.push({
+          id: doc.id,
+          name: data.name,
+          description: data.description,
+          thumbnail: data.thumbnail,
+          code: data.code,
+          categories: data.categories,
+          created_at: data.created_at.toDate(),
+          updated_at: data.updated_at.toDate(),
+        });
+      });
+
+      setComponents(componentList);
+    };
+
+    fetchComponents();
   }, []);
 
-  console.log(components);
+  // if (loading) {
+  //   return <div>Loading...</div>;
+  // }
 
   return (
     <div className="columns-1 md:columns-2 xl:columns-3 gap-5 m-10">
       {components.map((component) => (
-        <Link href={`/components/preview/${component.id}`} key={component.id}>
+        <Link href={`/component/preview/${component.id}`} key={component.id}>
           <div className="break-inside-avoid mb-4 p-4 bg-white rounded-xl">
             <Image
               className="h-auto max-w-full rounded-lg"
@@ -104,12 +60,26 @@ export default function Page() {
               width={500}
               height={200}
             />
-            <p className="text-base font-semibold text-gray-700 mt-2">
-              {component.name}
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-base font-semibold text-gray-700 mt-2">
+                {component.name}
+              </p>
+              <div className="flex gap-2">
+                {component.categories.map((category) => (
+                  <span
+                    key={category}
+                    className="py-1 px-3 bg-slate-200 rounded-full text-sm"
+                  >
+                    {category}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
         </Link>
       ))}
     </div>
   );
-}
+};
+
+export default CategoryComponent;

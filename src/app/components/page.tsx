@@ -5,13 +5,7 @@ import { collection, getDocs } from "firebase/firestore";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect } from "react";
-
-interface IComponent {
-  id: string;
-  name: string;
-  thumbnail: string;
-  description: string;
-}
+import { IComponent } from "@/interfaces/ComponentInterface";
 
 export default function Page() {
   const [components, setComponents] = useState<IComponent[]>([]);
@@ -28,6 +22,10 @@ export default function Page() {
           name: string;
           thumbnail: string;
           description: string;
+          categories: string[];
+          code: string;
+          created_at: Date;
+          updated_at: Date;
         }),
       }));
 
@@ -45,7 +43,7 @@ export default function Page() {
   return (
     <div className="columns-1 md:columns-2 xl:columns-3 gap-5 m-10">
       {components.map((component) => (
-        <Link href={`/components/${component.id}`} key={component.id}>
+        <Link href={`/component/preview/${component.id}`} key={component.id}>
           <div className="break-inside-avoid mb-4 p-4 bg-white rounded-xl">
             <Image
               className="h-auto max-w-full rounded-lg"
@@ -54,9 +52,21 @@ export default function Page() {
               width={500}
               height={200}
             />
-            <p className="text-base font-semibold text-gray-700 mt-2">
-              {component.name}
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-base font-semibold text-gray-700 mt-2">
+                {component.name}
+              </p>
+              <div className="flex gap-2">
+                {component.categories.map((category) => (
+                  <span
+                    key={category}
+                    className="py-1 px-3 bg-slate-200 rounded-full text-sm"
+                  >
+                    {category}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
         </Link>
       ))}
