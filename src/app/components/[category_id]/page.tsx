@@ -33,8 +33,8 @@ const CategoryComponent = () => {
           thumbnail: data.thumbnail,
           code: data.code,
           categories: data.categories,
-          created_at: data.created_at.toDate(),
-          updated_at: data.updated_at.toDate(),
+          created_at: data.created_at,
+          updated_at: data.updated_at,
         });
       });
 

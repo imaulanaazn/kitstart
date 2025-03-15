@@ -49,8 +49,8 @@ export default function AdminComponents() {
         code,
         categories: selectedCategories,
         thumbnail: imageUrl,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       });
       setName("");
       setDescription("");

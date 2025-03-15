@@ -24,12 +24,15 @@ export default function Home() {
             thumbnail: string;
             description: string;
             code: string;
-            created_at: Date;
-            updated_at: Date;
+            created_at: string;
+            updated_at: string;
             categories: string[];
           }),
         }))
-        .sort((a, b) => b.created_at.getTime() - a.created_at.getTime())
+        .sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        )
         .slice(0, 20);
 
       setComponents(components);
