@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { toast } from "react-toastify";
 
 export default function Page() {
   const [showCode, setShowCode] = useState(false);
@@ -10,7 +11,7 @@ export default function Page() {
     navigator.clipboard
       .writeText(getCode())
       .then(() => {
-        alert("Copied to clipboard!");
+        toast.success("Copied to clipboard!");
       })
       .catch((err) => {
         console.error("Failed to copy: ", err);
