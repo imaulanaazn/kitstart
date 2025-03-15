@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { ToastContainer, toast } from "react-toastify";
 
@@ -31,6 +31,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const path = usePathname();
+  const router = useRouter();
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [keyword, setKeyword] = useState("");
 
@@ -55,7 +56,7 @@ export default function RootLayout({
       cat.name?.toLowerCase().includes(keyword.toLowerCase())
     );
     if (category) {
-      window.location.href = `/components/${category.id}`;
+      router.push(`/components/${category.id}`);
     } else {
       toast.error("Component not found");
     }
