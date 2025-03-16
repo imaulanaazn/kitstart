@@ -52,7 +52,7 @@ export default function Page() {
               width={500}
               height={200}
             />
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between  mt-2">
               <p className="text-base font-semibold text-gray-700 mt-2">
                 {component.name}
               </p>

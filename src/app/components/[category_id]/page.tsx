@@ -60,8 +60,8 @@ const CategoryComponent = () => {
               width={500}
               height={200}
             />
-            <div className="flex items-center justify-between">
-              <p className="text-base font-semibold text-gray-700 mt-2">
+            <div className="flex items-center justify-between mt-2">
+              <p className="text-base font-semibold text-gray-700">
                 {component.name}
               </p>
               <div className="flex gap-2">
